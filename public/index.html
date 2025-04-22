@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            max-width: 100%;
+        }
+        .loading {
+            display: none;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Generator1</h1>
+        <div class="input-group">
+            <input type="text" id="prompt" placeholder="Enter your prompt here...">
+            <button onclick="generateImage()">Generate</button>
+        </div>
+        <div class="loading" id="loading">Generating image...</div>
+        <img id="result" style="display: none;">
+    </div>
+
+    <script>
+        async function generateImage() {
+            const prompt = document.getElementById('prompt').value;
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+
+            if (!prompt) {
+                alert('Please enter a prompt');
+                return;
+            }
+
+            loading.style.display = 'block';
+            result.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/generate-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                const imageUrl = data.data[0].imageURL;
+                result.src = imageUrl;
+                result.style.display = 'block';
+            } catch (error) {
+                alert('Error generating image: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
